@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Environment secrets — NEVER commit these
+.env
+server/.env
+
+# Build output
+client/dist/
+client/build/
+
+# Uploaded files (private user documents)
+server/uploads/*
+!server/uploads/.gitkeep
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+.vscode/
+*.log
+
+# Vite cache
+client/.vite/
