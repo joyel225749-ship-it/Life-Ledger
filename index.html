@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f6f7fb" />
+    <meta name="description" content="LifeLedger keeps product receipts, warranties, repairs, and ownership costs organized." />
+    <title>LifeLedger — Product Care Dashboard</title>
+    <!--
+      SPA redirect fix for GitHub Pages.
+      Reads the path encoded by 404.html and restores it via history.replaceState
+      before React mounts, so React Router sees the correct URL.
+      https://github.com/rafgraph/spa-github-pages
+    -->
+    <script>
+      (function(l) {
+        if (l.search[1] === '/') {
+          var decoded = l.search.slice(1).split('&').map(function(s) {
+            return s.replace(/~and~/g, '&');
+          }).join('?');
+          window.history.replaceState(
+            null, null,
+            l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      }(window.location));
+    </script>
+    <script type="module" crossorigin src="/Life-Ledger/assets/index-BEnnzce4.js"></script>
+    <link rel="stylesheet" crossorigin href="/Life-Ledger/assets/index-CmppAp5U.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
