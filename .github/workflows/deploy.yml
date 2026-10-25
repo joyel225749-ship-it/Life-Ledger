@@ -1,69 +1,73 @@
-# .github/workflows/deploy.yml
-#
-# Builds the React/Vite frontend from the `client` folder and deploys
-# the built `dist/` output to GitHub Pages.
-#
-# ── Trigger ──────────────────────────────────────────────────────────
-# Runs automatically on every push to `main`.
-# Can also be triggered manually from the Actions tab.
-#
-# ── What it does NOT do ──────────────────────────────────────────────
-# It does NOT deploy the backend (server/).
-# It does NOT expose .env files or secrets.
-
 name: Deploy Frontend to GitHub Pages
 
+# Runs on every push to main, or manually from the Actions tab
 on:
   push:
     branches:
       - main
-  workflow_dispatch:   # allow manual trigger from GitHub Actions tab
+  workflow_dispatch:
 
-# Give the workflow permission to write to the gh-pages branch
+# Required permissions for the official GitHub Pages deployment
 permissions:
-  contents: write
+  contents: read   # read the repo source
+  pages: write     # publish to GitHub Pages
+  id-token: write  # verify the deployment origin
+
+# Only allow one deployment at a time; cancel pending runs if a new push arrives
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   build-and-deploy:
-    name: Build React app and deploy
+    name: Build and deploy React app
     runs-on: ubuntu-latest
 
+    # Links this job to the github-pages environment so GitHub shows the URL
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
-      # 1 — Checkout the repository
-      - name: Checkout code
+      # 1 — Check out the full repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2 — Set up Node.js (LTS)
-      - name: Set up Node.js
+      # 2 — Install Node.js 20 LTS and cache npm packages
+      - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
           cache-dependency-path: client/package-lock.json
 
-      # 3 — Install client dependencies
+      # 3 — Install only production-locked dependencies
       - name: Install dependencies
         working-directory: client
         run: npm ci
 
       # 4 — Build the Vite app
-      #     VITE_API_URL points to the deployed backend.
-      #     If you have not deployed a backend yet, leave it blank —
-      #     the demo/login pages will still render; API calls will fail
-      #     until you set this secret in GitHub → Settings → Secrets.
-      - name: Build
+      #     vite.config.js sets base='/Life-Ledger/' when command === 'build'
+      #     VITE_API_URL is read from GitHub → Settings → Secrets → Actions
+      #     If the secret is not set yet, the frontend still builds fine
+      #     (API calls will fail until the backend is deployed on Render)
+      - name: Build Vite app
         working-directory: client
         env:
-          # Set this secret in GitHub → Settings → Secrets → Actions
-          # e.g. https://lifeledger-api.onrender.com
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
         run: npm run build
 
-      # 5 — Deploy dist/ to the gh-pages branch
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      # 5 — Configure the GitHub Pages environment
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v4
+
+      # 6 — Upload the built dist/ folder as a Pages artifact
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: client/dist
-          # Keep the custom 404.html that handles React Router paths
-          force_orphan: false
+          path: client/dist   # the folder vite build outputs to
+
+      # 7 — Deploy the artifact to GitHub Pages
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
