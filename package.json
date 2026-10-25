@@ -1,0 +1,9 @@
+{
+  "name": "lifeledger",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd server && npm install",
+    "start": "cd server && node src/index.js"
+  }
+}
