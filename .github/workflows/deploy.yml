@@ -55,7 +55,7 @@ jobs:
         working-directory: client
         env:
           # Backend deployed on Render — not a secret, safe to commit
-          VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://lifeledger-api-xzuv.onrender.com' }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://lifeledger-api-f67c.onrender.com' }}
         run: npm run build
 
       # 5 — Configure the GitHub Pages environment
